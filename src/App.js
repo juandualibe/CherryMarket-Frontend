@@ -3,11 +3,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// 1. Importamos el ThemeProvider y nuestro tema
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './theme';
 
-// El resto de tus imports...
 import { CssBaseline, Box, Button, Typography, AppBar, Toolbar } from '@mui/material';
 import LoginPage from './LoginPage';
 import Layout from './Layout';
@@ -20,11 +18,22 @@ function App() {
     const handleLoginSuccess = () => setIsLoggedIn(true);
     const handleLogout = () => setIsLoggedIn(false);
 
-    // 2. Envolvemos toda la aplicación en el ThemeProvider
     return (
         <ThemeProvider theme={theme}>
-            <CssBaseline /> {/* Normaliza los estilos base */}
-            <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
+            <CssBaseline />
+            {/* --- CAMBIO AQUÍ --- */}
+            <ToastContainer
+                position="bottom-center" // Posición en la parte inferior
+                autoClose={2000}        // Duración de 2 segundos
+                hideProgressBar
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="colored"
+            />
             <BrowserRouter>
                 <Routes>
                     <Route path="/login" element={
