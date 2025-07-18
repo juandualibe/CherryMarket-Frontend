@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
+import axios from 'axios';
 import { toast } from 'react-toastify';
-import { Container, Box, Typography, TextField, Button, Paper } from '@mui/material';
-
-// 1. Importamos la imagen del logo desde la carpeta assets
+import { Container, Box, Typography, TextField, Button, Paper, Link } from '@mui/material';
 import logo from './assets/logo.png';
-import { Link as RouterLink } from 'react-router-dom'; // 1. Importa Link
-import { Link } from '@mui/material'; // Asegúrate que este también esté
 
 const LoginPage = ({ onLoginSuccess }) => {
     const [username, setUsername] = useState('');
@@ -13,30 +11,26 @@ const LoginPage = ({ onLoginSuccess }) => {
 
     const handleLogin = (e) => {
         e.preventDefault();
-        if (username === 'admin' && password === 'admin') {
-            toast.success('¡Bienvenido!');
-            onLoginSuccess();
-        } else {
-            toast.error('Usuario o contraseña incorrectos.');
-        }
+        const credentials = { username, password };
+
+        // --- LÓGICA DE LOGIN REAL ---
+        axios.post(`${process.env.REACT_APP_API_URL}/api/auth/login`, credentials)
+            .then(response => {
+                // 1. Guardamos el token que nos da el backend
+                localStorage.setItem('token', response.data.token);
+                toast.success('¡Bienvenido!');
+                onLoginSuccess(); // Avisamos a App.js que el login fue exitoso
+            })
+            .catch(error => {
+                const message = error.response?.data?.message || 'Error al iniciar sesión.';
+                toast.error(message);
+            });
     };
 
     return (
         <Container component="main" maxWidth="sm">
             <Paper elevation={6} sx={{ mt: 8, p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                
-                {/* 2. Añadimos la imagen aquí */}
-                <Box
-                    component="img"
-                    sx={{
-                        height: 120,
-                        width: 120,
-                        mb: 2, // Margen inferior de 2 unidades
-                    }}
-                    alt="Logo de Cherry Market."
-                    src={logo}
-                />
-
+                <Box component="img" sx={{ height: 120, width: 120, mb: 2 }} alt="Logo de Cherry Market." src={logo} />
                 <Typography component="h1" variant="h4" gutterBottom>
                     Cherry Market
                 </Typography>
@@ -48,9 +42,7 @@ const LoginPage = ({ onLoginSuccess }) => {
                         margin="normal"
                         required
                         fullWidth
-                        id="username"
                         label="Usuario"
-                        name="username"
                         autoComplete="username"
                         autoFocus
                         value={username}
@@ -63,20 +55,13 @@ const LoginPage = ({ onLoginSuccess }) => {
                         name="password"
                         label="Contraseña"
                         type="password"
-                        id="password"
                         autoComplete="current-password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        sx={{ mt: 3, mb: 2 }}
-                    >
+                    <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
                         Iniciar Sesión
                     </Button>
-                    {/* 2. Añade este bloque de código */}
                     <Typography align="center">
                         <Link component={RouterLink} to="/register" variant="body2">
                             ¿No tienes una cuenta? Regístrate
