@@ -14,7 +14,7 @@ import logo from './assets/logo.png';
 const drawerWidth = 240;
 const headerHeight = '90px';
 
-// 1. Ahora Layout recibe 'userRole' como prop
+// 1. Layout ahora recibe 'userRole'
 const Layout = ({ onLogout, children, userRole }) => {
     const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -22,7 +22,7 @@ const Layout = ({ onLogout, children, userRole }) => {
         setMobileOpen(!mobileOpen);
     };
 
-    // 2. Definimos qué roles pueden ver cada item del menú
+    // 2. Definimos la lista completa de items y qué roles pueden verlos
     const allMenuItems = [
         { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard', roles: ['admin', 'cashier'] },
         { text: 'Punto de Venta', icon: <PointOfSaleIcon />, path: '/pos', roles: ['admin', 'cashier'] },
@@ -31,7 +31,7 @@ const Layout = ({ onLogout, children, userRole }) => {
         { text: 'Categorías', icon: <CategoryIcon />, path: '/categories', roles: ['admin'] },
     ];
 
-    // 3. Filtramos el menú para mostrar solo los items permitidos para el rol actual
+    // 3. Filtramos la lista para mostrar solo los items permitidos para el rol actual
     const visibleMenuItems = allMenuItems.filter(item => item.roles.includes(userRole));
 
     const drawerContent = (
@@ -41,7 +41,7 @@ const Layout = ({ onLogout, children, userRole }) => {
             </Box>
             <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.2)' }} />
             <List>
-                {/* 4. Usamos la lista filtrada 'visibleMenuItems' */}
+                {/* 4. Usamos la lista ya filtrada */}
                 {visibleMenuItems.map((item) => (
                     <ListItem key={item.text} disablePadding component={RouterLink} to={item.path} sx={{ color: 'white' }}>
                         <ListItemButton>

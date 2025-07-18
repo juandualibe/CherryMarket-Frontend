@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { jwtDecode } from 'jwt-decode'; // 1. Importamos el decodificador
+import { jwtDecode } from 'jwt-decode';
 
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './theme';
@@ -21,7 +21,7 @@ import PosView from './PosView';
 import SalesHistory from './SalesHistory';
 import CategoryManager from './CategoryManager';
 
-// El componente ProtectedRoute no necesita cambios
+// Componente para proteger rutas generales
 const ProtectedRoute = ({ isLoggedIn, children }) => {
     if (!isLoggedIn) {
         return <Navigate to="/login" />;
@@ -29,19 +29,31 @@ const ProtectedRoute = ({ isLoggedIn, children }) => {
     return children;
 };
 
+// Nuevo componente para proteger rutas SOLO de administradores
+const AdminRoute = ({ isLoggedIn, userRole, children }) => {
+    if (!isLoggedIn) {
+        return <Navigate to="/login" />;
+    }
+    if (userRole !== 'admin') {
+        // Si no es admin, lo mandamos al dashboard
+        return <Navigate to="/dashboard" />;
+    }
+    return children;
+};
+
+
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userRole, setUserRole] = useState(null); // 2. Nuevo estado para el rol
+    const [userRole, setUserRole] = useState(null);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
             try {
                 const decodedToken = jwtDecode(token);
-                setUserRole(decodedToken.role); // Guardamos el rol
+                setUserRole(decodedToken.role);
                 setIsLoggedIn(true);
             } catch (error) {
-                // Si el token es inválido, lo borramos
                 localStorage.removeItem('token');
             }
         }
@@ -51,7 +63,7 @@ function App() {
         const token = localStorage.getItem('token');
         if (token) {
             const decodedToken = jwtDecode(token);
-            setUserRole(decodedToken.role); // Guardamos el rol al iniciar sesión
+            setUserRole(decodedToken.role);
             setIsLoggedIn(true);
         }
     };
@@ -59,7 +71,7 @@ function App() {
     const handleLogout = () => {
         localStorage.removeItem('token');
         setIsLoggedIn(false);
-        setUserRole(null); // Limpiamos el rol
+        setUserRole(null);
     };
 
     return (
@@ -72,7 +84,7 @@ function App() {
                         <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
                         <Route path="/register" element={<RegisterPage />} />
 
-                        {/* 3. Pasamos el rol del usuario al Layout */}
+                        {/* Rutas para TODOS los usuarios logueados */}
                         <Route
                             path="/dashboard"
                             element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout} userRole={userRole}><Dashboard /></Layout></ProtectedRoute>}
@@ -81,17 +93,19 @@ function App() {
                             path="/pos"
                             element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout} userRole={userRole}><PosView /></Layout></ProtectedRoute>}
                         />
+
+                        {/* Rutas SOLO PARA ADMINS */}
                         <Route
                             path="/management"
-                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout} userRole={userRole}><ManagementView /></Layout></ProtectedRoute>}
+                            element={<AdminRoute isLoggedIn={isLoggedIn} userRole={userRole}><Layout onLogout={handleLogout} userRole={userRole}><ManagementView /></Layout></AdminRoute>}
                         />
                         <Route
                             path="/history"
-                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout} userRole={userRole}><SalesHistory /></Layout></ProtectedRoute>}
+                            element={<AdminRoute isLoggedIn={isLoggedIn} userRole={userRole}><Layout onLogout={handleLogout} userRole={userRole}><SalesHistory /></Layout></AdminRoute>}
                         />
                         <Route
                             path="/categories"
-                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout} userRole={userRole}><CategoryManager /></Layout></ProtectedRoute>}
+                            element={<AdminRoute isLoggedIn={isLoggedIn} userRole={userRole}><Layout onLogout={handleLogout} userRole={userRole}><CategoryManager /></Layout></AdminRoute>}
                         />
                         
                         <Route path="*" element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} />} />
