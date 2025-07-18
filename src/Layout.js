@@ -7,14 +7,14 @@ import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 import InventoryIcon from '@mui/icons-material/Inventory';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong'; // Ícono para el historial
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import CategoryIcon from '@mui/icons-material/Category'; // Nuevo ícono para categorías
 
 import logo from './assets/logo.png';
 
 const drawerWidth = 240;
 const headerHeight = '90px'; // La altura que definimos para el header
 
-// Añadimos 'children' a las props que recibe el componente
 const Layout = ({ onLogout, children }) => {
     const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -28,6 +28,7 @@ const Layout = ({ onLogout, children }) => {
         { text: 'Punto de Venta', icon: <PointOfSaleIcon />, path: '/pos' },
         { text: 'Gestión', icon: <InventoryIcon />, path: '/management' },
         { text: 'Historial de Ventas', icon: <ReceiptLongIcon />, path: '/history' },
+        { text: 'Categorías', icon: <CategoryIcon />, path: '/categories' },
     ];
 
     const drawerContent = (

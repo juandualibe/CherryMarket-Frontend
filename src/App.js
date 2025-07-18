@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; // LÍNEA CORREGIDA
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -7,10 +7,9 @@ import { ThemeProvider } from '@mui/material/styles';
 import theme from './theme';
 import { CssBaseline } from '@mui/material';
 
-// 1. Imports para el selector de fecha
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { es } from 'date-fns/locale'; // Para fechas en español
+import { es } from 'date-fns/locale';
 
 import LoginPage from './LoginPage';
 import RegisterPage from './RegisterPage';
@@ -19,6 +18,7 @@ import Dashboard from './Dashboard';
 import ManagementView from './ManagementView';
 import PosView from './PosView';
 import SalesHistory from './SalesHistory';
+import CategoryManager from './CategoryManager';
 
 // Pequeño componente para proteger las rutas
 const ProtectedRoute = ({ isLoggedIn, children }) => {
@@ -47,7 +47,6 @@ function App() {
 
     return (
         <ThemeProvider theme={theme}>
-            {/* 2. Envolvemos la aplicación con el LocalizationProvider */}
             <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
                 <CssBaseline />
                 <ToastContainer position="bottom-center" autoClose={2000} hideProgressBar />
@@ -73,6 +72,10 @@ function App() {
                         <Route
                             path="/history"
                             element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout}><SalesHistory /></Layout></ProtectedRoute>}
+                        />
+                        <Route
+                            path="/categories"
+                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout}><CategoryManager /></Layout></ProtectedRoute>}
                         />
 
                         {/* Redirección por defecto */}
