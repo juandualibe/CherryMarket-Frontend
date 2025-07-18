@@ -1,28 +1,36 @@
-import React, { useState } from 'react';
-import apiClient from './api'; // 1. Cambiamos la importación
+import React, { useState, useEffect } from 'react';
+import apiClient from './api';
 import { toast } from 'react-toastify';
-import { Card, CardContent, CardActions, Typography, Button, TextField, Box, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { Card, CardContent, CardActions, Typography, Button, TextField, Box, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 
 const ProductItem = ({ product, onDataChanged }) => {
     const [open, setOpen] = useState(false);
     const [editData, setEditData] = useState({ ...product });
+    const [categories, setCategories] = useState([]);
 
-    const handleClickOpen = () => setOpen(true);
+    const handleClickOpen = () => {
+        apiClient.get('/api/categories')
+            .then(response => setCategories(response.data))
+            .catch(() => toast.error('No se pudieron cargar las categorías.'));
+        setOpen(true);
+    };
+    
     const handleClose = () => setOpen(false);
 
     const handleDelete = () => {
         if (window.confirm('¿Seguro que quieres eliminar?')) {
-            // 2. Usamos apiClient en lugar de axios
             apiClient.delete(`/api/products/${product.id}`)
-                .then(() => { toast.info('Producto eliminado.'); onDataChanged(); })
+                .then(() => { 
+                    toast.info('Producto eliminado.'); 
+                    onDataChanged(); 
+                })
                 .catch(() => toast.error('Error al eliminar.'));
         }
     };
 
     const handleUpdate = (e) => {
         e.preventDefault();
-        // 3. Usamos apiClient en lugar de axios
-        apiClient.put(`/api/products/${product.id}`, editData)
+        apiClient.put(`/api/products/${product.id}`, { ...editData, category_id: editData.category_id || null })
             .then(() => {
                 toast.success('Producto actualizado.');
                 handleClose();
@@ -30,8 +38,11 @@ const ProductItem = ({ product, onDataChanged }) => {
             })
             .catch(() => toast.error('Error al actualizar.'));
     };
-    
-    const handleInputChange = (e) => setEditData({ ...editData, [e.target.name]: e.target.value });
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setEditData({ ...editData, [name]: value });
+    };
 
     return (
         <>
@@ -41,6 +52,9 @@ const ProductItem = ({ product, onDataChanged }) => {
                     <Typography color="text.secondary">
                         ${product.price} - Stock: {product.stock}
                     </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                        Categoría: {product.category_name || 'Sin asignar'}
+                    </Typography>
                 </CardContent>
                 <CardActions>
                     <Button size="small" onClick={handleClickOpen}>Editar</Button>
@@ -48,30 +62,46 @@ const ProductItem = ({ product, onDataChanged }) => {
                 </CardActions>
             </Card>
 
-            <Dialog open={open} onClose={handleClose}>
+            <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
                 <DialogTitle>Editar Producto</DialogTitle>
                 <DialogContent>
                     <Box component="form" onSubmit={handleUpdate} sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
-                        <TextField
-                            label="Nombre del producto"
-                            name="name"
-                            value={editData.name}
-                            onChange={handleInputChange}
+                        <TextField 
+                            label="Nombre del producto" 
+                            name="name" 
+                            value={editData.name} 
+                            onChange={handleInputChange} 
                         />
-                        <TextField
+                        <TextField 
                             label="Precio"
-                            name="price"
-                            type="number"
-                            value={editData.price}
-                            onChange={handleInputChange}
+                            name="price" 
+                            type="number" 
+                            value={editData.price} 
+                            onChange={handleInputChange} 
                         />
-                        <TextField
+                        <TextField 
                             label="Stock"
-                            name="stock"
-                            type="number"
-                            value={editData.stock}
-                            onChange={handleInputChange}
+                            name="stock" 
+                            type="number" 
+                            value={editData.stock} 
+                            onChange={handleInputChange} 
                         />
+                        
+                        <FormControl fullWidth>
+                            <InputLabel id="edit-category-select-label">Categoría</InputLabel>
+                            <Select
+                                labelId="edit-category-select-label"
+                                name="category_id"
+                                value={editData.category_id || ''}
+                                label="Categoría"
+                                onChange={handleInputChange}
+                            >
+                                <MenuItem value=""><em>Sin Categoría</em></MenuItem>
+                                {categories.map((cat) => (
+                                    <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                     </Box>
                 </DialogContent>
                 <DialogActions>
