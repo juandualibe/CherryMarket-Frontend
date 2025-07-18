@@ -7,13 +7,18 @@ import { ThemeProvider } from '@mui/material/styles';
 import theme from './theme';
 import { CssBaseline } from '@mui/material';
 
+// 1. Imports para el selector de fecha
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { es } from 'date-fns/locale'; // Para fechas en español
+
 import LoginPage from './LoginPage';
 import RegisterPage from './RegisterPage';
 import Layout from './Layout';
 import Dashboard from './Dashboard';
 import ManagementView from './ManagementView';
 import PosView from './PosView';
-import SalesHistory from './SalesHistory'; // 1. Importamos el nuevo componente
+import SalesHistory from './SalesHistory';
 
 // Pequeño componente para proteger las rutas
 const ProtectedRoute = ({ isLoggedIn, children }) => {
@@ -42,37 +47,39 @@ function App() {
 
     return (
         <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <ToastContainer position="bottom-center" autoClose={2000} hideProgressBar />
-            <BrowserRouter>
-                <Routes>
-                    {/* Rutas Públicas */}
-                    <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
-                    <Route path="/register" element={<RegisterPage />} />
+            {/* 2. Envolvemos la aplicación con el LocalizationProvider */}
+            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+                <CssBaseline />
+                <ToastContainer position="bottom-center" autoClose={2000} hideProgressBar />
+                <BrowserRouter>
+                    <Routes>
+                        {/* Rutas Públicas */}
+                        <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
+                        <Route path="/register" element={<RegisterPage />} />
 
-                    {/* Rutas Protegidas */}
-                    <Route
-                        path="/dashboard"
-                        element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout}><Dashboard /></Layout></ProtectedRoute>}
-                    />
-                    <Route
-                        path="/pos"
-                        element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout}><PosView /></Layout></ProtectedRoute>}
-                    />
-                    <Route
-                        path="/management"
-                        element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout}><ManagementView /></Layout></ProtectedRoute>}
-                    />
-                    {/* 2. Añadimos la nueva ruta para el historial */}
-                    <Route
-                        path="/history"
-                        element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout}><SalesHistory /></Layout></ProtectedRoute>}
-                    />
+                        {/* Rutas Protegidas */}
+                        <Route
+                            path="/dashboard"
+                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout}><Dashboard /></Layout></ProtectedRoute>}
+                        />
+                        <Route
+                            path="/pos"
+                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout}><PosView /></Layout></ProtectedRoute>}
+                        />
+                        <Route
+                            path="/management"
+                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout}><ManagementView /></Layout></ProtectedRoute>}
+                        />
+                        <Route
+                            path="/history"
+                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout}><SalesHistory /></Layout></ProtectedRoute>}
+                        />
 
-                    {/* Redirección por defecto */}
-                    <Route path="*" element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} />} />
-                </Routes>
-            </BrowserRouter>
+                        {/* Redirección por defecto */}
+                        <Route path="*" element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} />} />
+                    </Routes>
+                </BrowserRouter>
+            </LocalizationProvider>
         </ThemeProvider>
     );
 }
