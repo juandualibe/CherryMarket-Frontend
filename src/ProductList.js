@@ -1,38 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React from 'react';
 import ProductItem from './ProductItem';
-import { toast } from 'react-toastify';
+import { Typography, Box, CircularProgress } from '@mui/material';
 
-const ProductList = ({ refresh, onDataChanged }) => {
-    const [products, setProducts] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-
-    useEffect(() => {
-        setIsLoading(true);
-        axios.get('http://localhost:5000/api/products')
-            .then(response => {
-                setProducts(response.data);
-            })
-            .catch(error => {
-                console.error('Hubo un error al obtener los productos:', error);
-                toast.error('Error al cargar los productos.');
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
-    }, [refresh]);
-
+// Este componente solo recibe props y las muestra. No hace llamadas a la API.
+const ProductList = ({ products, isLoading, onDataChanged }) => {
     return (
-        <div>
-            <h2>Lista de Productos</h2>
-            
-            {/* ESTA ES LA LÓGICA EXPLICADA: */}
+        <Box>
+            <Typography variant="h5" component="h3" gutterBottom>
+                Lista de Productos
+            </Typography>
             {isLoading ? (
-                // Si isLoading es true, muestra esto:
-                <p>Cargando productos...</p>
+                <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                    <CircularProgress />
+                </Box>
             ) : (
-                // Si isLoading es false, muestra esto:
-                <ul style={{ listStyle: 'none', padding: 0 }}>
+                <Box>
                     {products.map(product => (
                         <ProductItem
                             key={product.id}
@@ -40,9 +22,9 @@ const ProductList = ({ refresh, onDataChanged }) => {
                             onDataChanged={onDataChanged}
                         />
                     ))}
-                </ul>
+                </Box>
             )}
-        </div>
+        </Box>
     );
 };
 
