@@ -1,49 +1,40 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { Card, CardContent, CardActions, Typography, Button, TextField, Box } from '@mui/material';
-
+import { Card, CardContent, CardActions, Typography, Button, TextField, Box, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 
 const ProductItem = ({ product, onDataChanged }) => {
-    const [isEditing, setIsEditing] = useState(false);
+    // 1. Cambiamos 'isEditing' por 'open' para controlar el modal
+    const [open, setOpen] = useState(false); 
     const [editData, setEditData] = useState({ ...product });
 
+    const handleClickOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
+
     const handleDelete = () => {
-        if (window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+        if (window.confirm('¿Seguro que quieres eliminar?')) {
             axios.delete(`${process.env.REACT_APP_API_URL}/api/products/${product.id}`)
-                .then(() => {
-                    toast.info('Producto eliminado.');
-                    onDataChanged();
-                })
-                .catch(error => {
-                    console.error('Error al eliminar:', error);
-                    toast.error('Error al eliminar el producto.');
-                });
+                .then(() => { toast.info('Producto eliminado.'); onDataChanged(); })
+                .catch(() => toast.error('Error al eliminar.'));
         }
     };
 
     const handleUpdate = (e) => {
         e.preventDefault();
         axios.put(`${process.env.REACT_APP_API_URL}/api/products/${product.id}`, editData)
-            .then(() => {
-                toast.success('Producto actualizado.');
-                setIsEditing(false);
-                onDataChanged();
+            .then(() => { 
+                toast.success('Producto actualizado.'); 
+                handleClose(); // Cerramos el modal
+                onDataChanged(); 
             })
-            .catch(error => {
-                console.error('Error al actualizar:', error);
-                toast.error('Error al actualizar el producto.');
-            });
+            .catch(() => toast.error('Error al actualizar.'));
     };
+    
+    const handleInputChange = (e) => setEditData({ ...editData, [e.target.name]: e.target.value });
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setEditData({ ...editData, [name]: value });
-    };
-
-    // Este return asume que ya refactorizaste a MUI.
-    if (!isEditing) {
-        return (
+    return (
+        <>
+            {/* Esta es la vista normal del producto, siempre visible */}
             <Card sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <CardContent sx={{ flexGrow: 1 }}>
                     <Typography variant="h6">{product.name}</Typography>
@@ -52,23 +43,45 @@ const ProductItem = ({ product, onDataChanged }) => {
                     </Typography>
                 </CardContent>
                 <CardActions>
-                    <Button size="small" onClick={() => setIsEditing(true)}>Editar</Button>
+                    {/* 2. El botón editar ahora abre el modal */}
+                    <Button size="small" onClick={handleClickOpen}>Editar</Button>
                     <Button size="small" color="error" onClick={handleDelete}>Eliminar</Button>
                 </CardActions>
             </Card>
-        );
-    }
-    
-    return (
-        <Card sx={{ mb: 2, p: 2 }}>
-            <Box component="form" onSubmit={handleUpdate} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <TextField size="small" name="name" value={editData.name} onChange={handleInputChange} sx={{ flex: 3 }} />
-                <TextField size="small" name="price" type="number" value={editData.price} onChange={handleInputChange} sx={{ flex: 1 }} />
-                <TextField size="small" name="stock" type="number" value={editData.stock} onChange={handleInputChange} sx={{ flex: 1 }} />
-                <Button type="submit" size="small" variant="contained" color="success">Guardar</Button>
-                <Button size="small" onClick={() => setIsEditing(false)}>Cancelar</Button>
-            </Box>
-        </Card>
+
+            {/* 3. Este es el Modal (Dialog) que se abre para editar */}
+            <Dialog open={open} onClose={handleClose}>
+                <DialogTitle>Editar Producto</DialogTitle>
+                <DialogContent>
+                    <Box component="form" onSubmit={handleUpdate} sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+                        <TextField 
+                            label="Nombre del producto" 
+                            name="name" 
+                            value={editData.name} 
+                            onChange={handleInputChange} 
+                        />
+                        <TextField 
+                            label="Precio"
+                            name="price" 
+                            type="number" 
+                            value={editData.price} 
+                            onChange={handleInputChange} 
+                        />
+                        <TextField 
+                            label="Stock"
+                            name="stock" 
+                            type="number" 
+                            value={editData.stock} 
+                            onChange={handleInputChange} 
+                        />
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose}>Cancelar</Button>
+                    <Button onClick={handleUpdate} variant="contained" color="primary">Guardar Cambios</Button>
+                </DialogActions>
+            </Dialog>
+        </>
     );
 };
 
