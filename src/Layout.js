@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Outlet, Link as RouterLink } from 'react-router-dom';
+// 1. Quitamos 'Outlet' porque ya no lo usamos aquí
+import { Link as RouterLink } from 'react-router-dom'; 
 import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, AppBar, Toolbar, Typography, CssBaseline, Divider, Button, IconButton } from '@mui/material';
 
 import MenuIcon from '@mui/icons-material/Menu';
@@ -10,9 +11,10 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import logo from './assets/logo.png';
 
 const drawerWidth = 240;
-const headerHeight = '90px'; // La altura que definimos para el header
+const headerHeight = '90px';
 
-const Layout = ({ onLogout }) => {
+// 2. Añadimos 'children' a las props que recibe el componente
+const Layout = ({ onLogout, children }) => { 
     const [mobileOpen, setMobileOpen] = useState(false);
 
     const handleDrawerToggle = () => {
@@ -49,12 +51,9 @@ const Layout = ({ onLogout }) => {
             <CssBaseline />
             <AppBar
                 position="fixed"
-                // Lógica de posicionamiento condicional para la AppBar
                 sx={{
-                    // En pantallas 'md' y superiores, empieza DESPUÉS del drawer
                     width: { md: `calc(100% - ${drawerWidth}px)` },
                     ml: { md: `${drawerWidth}px` },
-                    // En pantallas pequeñas ('xs', 'sm'), ocupa el 100%
                 }}
             >
                 <Toolbar sx={{ height: headerHeight }}>
@@ -63,7 +62,7 @@ const Layout = ({ onLogout }) => {
                         aria-label="open drawer"
                         edge="start"
                         onClick={handleDrawerToggle}
-                        sx={{ mr: 2, display: { md: 'none' } }} // Solo se muestra en móvil
+                        sx={{ mr: 2, display: { md: 'none' } }}
                     >
                         <MenuIcon />
                     </IconButton>
@@ -75,7 +74,6 @@ const Layout = ({ onLogout }) => {
             </AppBar>
             
             <Box component="nav" sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}>
-                {/* Drawer para móviles (temporal) */}
                 <Drawer
                     variant="temporary"
                     open={mobileOpen}
@@ -88,7 +86,6 @@ const Layout = ({ onLogout }) => {
                 >
                     {drawerContent}
                 </Drawer>
-                {/* Drawer para escritorio (permanente) */}
                 <Drawer
                     variant="permanent"
                     sx={{
@@ -102,8 +99,9 @@ const Layout = ({ onLogout }) => {
             </Box>
 
             <Box component="main" sx={{ flexGrow: 1, p: 3, width: { md: `calc(100% - ${drawerWidth}px)` } }}>
-                <Box sx={{ height: headerHeight }}/> {/* Espaciador */}
-                <Outlet />
+                <Box sx={{ height: headerHeight }}/>
+                {/* 3. Reemplazamos <Outlet /> por {children} */}
+                {children} 
             </Box>
         </Box>
     );
