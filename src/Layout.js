@@ -1,30 +1,33 @@
 import React, { useState } from 'react';
-// 1. Quitamos 'Outlet' porque ya no lo usamos aquí
-import { Link as RouterLink } from 'react-router-dom'; 
+import { Link as RouterLink } from 'react-router-dom';
 import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, AppBar, Toolbar, Typography, CssBaseline, Divider, Button, IconButton } from '@mui/material';
 
+// Importamos los íconos
 import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 import InventoryIcon from '@mui/icons-material/Inventory';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong'; // Ícono para el historial
 
 import logo from './assets/logo.png';
 
 const drawerWidth = 240;
-const headerHeight = '90px';
+const headerHeight = '90px'; // La altura que definimos para el header
 
-// 2. Añadimos 'children' a las props que recibe el componente
-const Layout = ({ onLogout, children }) => { 
+// Añadimos 'children' a las props que recibe el componente
+const Layout = ({ onLogout, children }) => {
     const [mobileOpen, setMobileOpen] = useState(false);
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
     };
 
+    // Añadimos el nuevo item al menú
     const menuItems = [
         { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
         { text: 'Punto de Venta', icon: <PointOfSaleIcon />, path: '/pos' },
         { text: 'Gestión', icon: <InventoryIcon />, path: '/management' },
+        { text: 'Historial de Ventas', icon: <ReceiptLongIcon />, path: '/history' },
     ];
 
     const drawerContent = (
@@ -100,8 +103,7 @@ const Layout = ({ onLogout, children }) => {
 
             <Box component="main" sx={{ flexGrow: 1, p: 3, width: { md: `calc(100% - ${drawerWidth}px)` } }}>
                 <Box sx={{ height: headerHeight }}/>
-                {/* 3. Reemplazamos <Outlet /> por {children} */}
-                {children} 
+                {children}
             </Box>
         </Box>
     );

@@ -13,6 +13,7 @@ import Layout from './Layout';
 import Dashboard from './Dashboard';
 import ManagementView from './ManagementView';
 import PosView from './PosView';
+import SalesHistory from './SalesHistory'; // 1. Importamos el nuevo componente
 
 // Pequeño componente para proteger las rutas
 const ProtectedRoute = ({ isLoggedIn, children }) => {
@@ -61,6 +62,11 @@ function App() {
                     <Route
                         path="/management"
                         element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout}><ManagementView /></Layout></ProtectedRoute>}
+                    />
+                    {/* 2. Añadimos la nueva ruta para el historial */}
+                    <Route
+                        path="/history"
+                        element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout}><SalesHistory /></Layout></ProtectedRoute>}
                     />
 
                     {/* Redirección por defecto */}
