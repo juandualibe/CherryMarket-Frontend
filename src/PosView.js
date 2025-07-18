@@ -3,7 +3,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import ProductCatalog from './ProductCatalog';
 import ShoppingCart from './ShoppingCart';
-import { Grid, Paper } from '@mui/material';
+import { Grid, Paper } from '@mui/material'; // Importamos Grid
 
 
 const PosView = () => {
@@ -87,7 +87,9 @@ const PosView = () => {
 
     // Este return asume que ya refactorizaste a MUI.
     return (
+        // Usamos el componente Grid container
         <Grid container spacing={3}>
+            {/* El catálogo ocupará 12/12 columnas en móvil y 7/12 en escritorio */}
             <Grid item xs={12} md={7}>
                 <ProductCatalog 
                     products={products}
@@ -95,6 +97,7 @@ const PosView = () => {
                     onAddToCart={addToCart} 
                 />
             </Grid>
+            {/* El carrito ocupará 12/12 columnas en móvil y 5/12 en escritorio */}
             <Grid item xs={12} md={5}>
                 <Paper sx={{p: 2, height: '100%'}}>
                     <ShoppingCart
