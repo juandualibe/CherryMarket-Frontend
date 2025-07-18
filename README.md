@@ -1,70 +1,49 @@
-# Getting Started with Create React App
+# 🍒 Cherry Market - Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Esta es la interfaz de usuario para la aplicación de punto de venta y gestión de inventario de Cherry Market, construida con React.
 
-## Available Scripts
+## Tecnologías Utilizadas
+- **React**: Librería para construir la interfaz de usuario.
+- **React Router DOM**: Para la navegación y el ruteo de la aplicación.
+- **Material-UI (MUI)**: Para un diseño profesional y componentes de UI pre-construidos.
+- **Axios**: Para realizar peticiones HTTP al backend.
+- **React Toastify**: Para mostrar notificaciones amigables al usuario.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## Características Implementadas
+- **Autenticación**: Página de inicio de sesión para administradores.
+- **Layout Profesional**: Diseño con menú lateral persistente y barra de navegación superior.
+- **Dashboard**: Página de bienvenida con resúmenes visuales.
+- **Gestión de Productos**: Funcionalidad CRUD (Crear, Leer, Actualizar, Eliminar) completa para los productos.
+- **Punto de Venta (POS)**: Interfaz para seleccionar productos, añadirlos a un carrito, modificar cantidades y registrar la venta.
+- **Búsqueda en Tiempo Real**: Filtrado instantáneo de productos en el catálogo.
+- **Validación de Stock**: La interfaz previene vender más productos de los que hay disponibles.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Cómo Empezar
 
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Instalación y Ejecución
+1.  **Clonar el repositorio:**
+    ```bash
+    git clone [https://github.com/tu-usuario/tu-repositorio.git](https://github.com/tu-usuario/tu-repositorio.git)
+    ```
+2.  **Navegar a la carpeta del frontend:**
+    ```bash
+    cd tu-repositorio/frontend
+    ```
+3.  **Instalar dependencias:**
+    ```bash
+    npm install
+    ```
+4.  **Configurar variables de entorno:**
+    Crea un archivo `.env` en la raíz de la carpeta `frontend` y añade la siguiente variable apuntando a la URL de tu backend:
+    ```
+    REACT_APP_API_URL=http://localhost:5000
+    ```
+5.  **Iniciar la aplicación:**
+    ```bash
+    npm start
+    ```
+La aplicación se abrirá en `http://localhost:3000`.
