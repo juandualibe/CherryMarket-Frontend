@@ -20,8 +20,13 @@ const ManagementView = () => {
             .then(response => {
                 setProducts(response.data);
             })
-            .catch(() => toast.error('Error al cargar productos.'))
-            .finally(() => setIsLoading(false));
+            .catch(() => {
+                toast.error('Error al cargar productos.');
+            })
+            .finally(() => {
+                // Esta línea faltaba o era incorrecta en la versión anterior
+                setIsLoading(false);
+            });
     }, [refresh]);
 
     return (
