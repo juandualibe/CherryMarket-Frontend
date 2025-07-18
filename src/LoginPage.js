@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+// 1. Importamos useNavigate para poder redirigir
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Container, Box, Typography, TextField, Button, Paper, Link } from '@mui/material';
@@ -8,18 +9,20 @@ import logo from './assets/logo.png';
 const LoginPage = ({ onLoginSuccess }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    // 2. Inicializamos la función de navegación
+    const navigate = useNavigate(); 
 
     const handleLogin = (e) => {
         e.preventDefault();
         const credentials = { username, password };
 
-        // --- LÓGICA DE LOGIN REAL ---
         axios.post(`${process.env.REACT_APP_API_URL}/api/auth/login`, credentials)
             .then(response => {
-                // 1. Guardamos el token que nos da el backend
                 localStorage.setItem('token', response.data.token);
                 toast.success('¡Bienvenido!');
-                onLoginSuccess(); // Avisamos a App.js que el login fue exitoso
+                onLoginSuccess();
+                // 3. Después del login exitoso, navegamos al dashboard
+                navigate('/dashboard'); 
             })
             .catch(error => {
                 const message = error.response?.data?.message || 'Error al iniciar sesión.';
