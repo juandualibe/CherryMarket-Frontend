@@ -1,55 +1,42 @@
 import React, { useState } from 'react';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { toast } from 'react-toastify';
-import { Container, Box, Typography, TextField, Button, Paper } from '@mui/material';
+import { Container, Box, Typography, TextField, Button, Paper, Link } from '@mui/material';
 
-// 1. Importamos la imagen del logo desde la carpeta assets
-import logo from './assets/logo.png';
-import { Link as RouterLink } from 'react-router-dom'; // 1. Importa Link
-import { Link } from '@mui/material'; // Asegúrate que este también esté
-
-const LoginPage = ({ onLoginSuccess }) => {
+const RegisterPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const navigate = useNavigate();
 
-    const handleLogin = (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        if (username === 'admin' && password === 'admin') {
-            toast.success('¡Bienvenido!');
-            onLoginSuccess();
-        } else {
-            toast.error('Usuario o contraseña incorrectos.');
-        }
+        const newUser = { username, password };
+
+        axios.post(`${process.env.REACT_APP_API_URL}/api/auth/register`, newUser)
+            .then(response => {
+                toast.success('¡Usuario registrado con éxito! Ahora puedes iniciar sesión.');
+                navigate('/login'); // Redirige al login después del registro exitoso
+            })
+            .catch(error => {
+                const message = error.response?.data?.message || 'Error al registrar el usuario.';
+                toast.error(message);
+            });
     };
 
     return (
         <Container component="main" maxWidth="sm">
             <Paper elevation={6} sx={{ mt: 8, p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                
-                {/* 2. Añadimos la imagen aquí */}
-                <Box
-                    component="img"
-                    sx={{
-                        height: 120,
-                        width: 120,
-                        mb: 2, // Margen inferior de 2 unidades
-                    }}
-                    alt="Logo de Cherry Market."
-                    src={logo}
-                />
-
                 <Typography component="h1" variant="h4" gutterBottom>
-                    Cherry Market
+                    Crear una Cuenta
                 </Typography>
-                <Typography component="p" color="text.secondary" align="center" sx={{ mb: 3 }}>
-                    Inicia sesión para gestionar el sistema de productos y ventas.
-                </Typography>
-                <Box component="form" onSubmit={handleLogin} sx={{ width: '100%' }}>
+                <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%', mt: 1 }}>
                     <TextField
                         margin="normal"
                         required
                         fullWidth
                         id="username"
-                        label="Usuario"
+                        label="Nombre de Usuario"
                         name="username"
                         autoComplete="username"
                         autoFocus
@@ -64,7 +51,7 @@ const LoginPage = ({ onLoginSuccess }) => {
                         label="Contraseña"
                         type="password"
                         id="password"
-                        autoComplete="current-password"
+                        autoComplete="new-password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
@@ -74,12 +61,11 @@ const LoginPage = ({ onLoginSuccess }) => {
                         variant="contained"
                         sx={{ mt: 3, mb: 2 }}
                     >
-                        Iniciar Sesión
+                        Registrarse
                     </Button>
-                    {/* 2. Añade este bloque de código */}
                     <Typography align="center">
-                        <Link component={RouterLink} to="/register" variant="body2">
-                            ¿No tienes una cuenta? Regístrate
+                        <Link component={RouterLink} to="/login" variant="body2">
+                            ¿Ya tienes una cuenta? Inicia sesión
                         </Link>
                     </Typography>
                 </Box>
@@ -88,4 +74,4 @@ const LoginPage = ({ onLoginSuccess }) => {
     );
 };
 
-export default LoginPage;
+export default RegisterPage;

@@ -12,6 +12,7 @@ import Layout from './Layout';
 import Dashboard from './Dashboard';
 import ManagementView from './ManagementView';
 import PosView from './PosView';
+import RegisterPage from './RegisterPage';
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -36,6 +37,10 @@ function App() {
             />
             <BrowserRouter>
                 <Routes>
+                    <Route path="/register" element={
+                        isLoggedIn ? <Navigate to="/dashboard" /> : <RegisterPage />
+                    } />
+                    
                     <Route path="/login" element={
                         isLoggedIn ? <Navigate to="/dashboard" /> : <LoginPage onLoginSuccess={handleLoginSuccess} />
                     } />
