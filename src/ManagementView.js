@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from './api'; // 1. Cambiamos la importación
 import { toast } from 'react-toastify';
 import ProductList from './ProductList';
 import AddProductForm from './AddProductForm';
@@ -16,7 +16,8 @@ const ManagementView = () => {
 
     useEffect(() => {
         setIsLoading(true);
-        axios.get(`${process.env.REACT_APP_API_URL}/api/products`)
+        // 2. Usamos apiClient en lugar de axios
+        apiClient.get('/api/products')
             .then(response => {
                 setProducts(response.data);
             })
@@ -24,7 +25,6 @@ const ManagementView = () => {
                 toast.error('Error al cargar productos.');
             })
             .finally(() => {
-                // Esta línea faltaba o era incorrecta en la versión anterior
                 setIsLoading(false);
             });
     }, [refresh]);

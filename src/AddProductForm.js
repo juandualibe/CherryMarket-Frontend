@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import apiClient from './api'; // 1. Cambiamos la importación
 import { toast } from 'react-toastify';
 import { Box, TextField, Button, Typography, Paper } from '@mui/material';
-
 
 const AddProductForm = ({ onDataChanged }) => {
     const [name, setName] = useState('');
@@ -14,10 +13,10 @@ const AddProductForm = ({ onDataChanged }) => {
         e.preventDefault();
         const newProduct = { name, price, stock, barcode };
 
-        axios.post(`${process.env.REACT_APP_API_URL}/api/products`, newProduct)
+        // 2. Usamos apiClient en lugar de axios
+        apiClient.post('/api/products', newProduct)
             .then(response => {
                 toast.success('¡Producto añadido con éxito!');
-                // Limpiamos los campos del formulario
                 setName('');
                 setPrice('');
                 setStock('');
@@ -30,8 +29,6 @@ const AddProductForm = ({ onDataChanged }) => {
             });
     };
 
-    // Este return asume que ya refactorizaste a MUI.
-    // Si no lo hiciste, usa tu JSX anterior.
     return (
         <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
             <Typography variant="h5" component="h3" gutterBottom>
