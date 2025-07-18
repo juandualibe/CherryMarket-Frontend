@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import apiClient from './api';
 import { Typography, Paper, Grid, Box, CircularProgress } from '@mui/material';
 import { toast } from 'react-toastify';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { subDays, format } from 'date-fns';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { subDays, format, parseISO } from 'date-fns';
 
 const Dashboard = () => {
     const [stats, setStats] = useState(null);
@@ -14,15 +14,12 @@ const Dashboard = () => {
         const fetchDashboardData = async () => {
             setIsLoading(true);
             try {
-                // Preparamos las fechas para el reporte de los últimos 7 días
                 const endDate = new Date();
-                const startDate = subDays(endDate, 6); // 6 días antes para un total de 7 días
+                const startDate = subDays(endDate, 6);
 
-                // Creamos las dos peticiones a la API
                 const statsPromise = apiClient.get('/api/dashboard/stats');
                 const salesPromise = apiClient.get(`/api/reports/sales-summary?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`);
 
-                // Ejecutamos ambas peticiones en paralelo para mayor eficiencia
                 const [statsResponse, salesResponse] = await Promise.all([statsPromise, salesPromise]);
 
                 setStats(statsResponse.data);
@@ -48,6 +45,14 @@ const Dashboard = () => {
 
     if (!stats) {
         return <Typography>No se pudieron cargar las estadísticas.</Typography>;
+    }
+
+    // Función para formatear los números del eje Y
+    const formatYAxis = (tickItem) => {
+        if (tickItem >= 1000) {
+            return `$${(tickItem / 1000).toLocaleString('es-AR')}k`;
+        }
+        return `$${tickItem}`;
     }
 
     return (
@@ -83,21 +88,20 @@ const Dashboard = () => {
                     </Paper>
                 </Grid>
                 
-                {/* Nuevo Gráfico de Ventas */}
                 <Grid item xs={12}>
-                    <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 300 }}>
+                    <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 350 }}>
                         <Typography variant="h6" color="primary" gutterBottom>
                             Ventas de la Última Semana
                         </Typography>
                         <ResponsiveContainer>
-                            <LineChart data={salesData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                            <BarChart data={salesData} margin={{ top: 5, right: 20, left: 30, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="date" />
-                                <YAxis />
-                                <Tooltip />
+                                <XAxis dataKey="date" tickFormatter={(dateStr) => format(parseISO(dateStr), 'dd/MM')} />
+                                <YAxis tickFormatter={formatYAxis} />
+                                <Tooltip wrapperStyle={{ width: 120, backgroundColor: '#ccc' }} />
                                 <Legend />
-                                <Line type="monotone" dataKey="total" stroke="#e53935" name="Ventas ($)" strokeWidth={2} />
-                            </LineChart>
+                                <Bar dataKey="total" fill="#e53935" name="Ventas ($)" maxBarSize={50} />
+                            </BarChart>
                         </ResponsiveContainer>
                     </Paper>
                 </Grid>
