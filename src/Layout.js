@@ -2,43 +2,47 @@ import React, { useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, AppBar, Toolbar, Typography, CssBaseline, Divider, Button, IconButton } from '@mui/material';
 
-// Importamos los íconos
 import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import CategoryIcon from '@mui/icons-material/Category'; // Nuevo ícono para categorías
+import CategoryIcon from '@mui/icons-material/Category';
 
 import logo from './assets/logo.png';
 
 const drawerWidth = 240;
-const headerHeight = '90px'; // La altura que definimos para el header
+const headerHeight = '90px';
 
-const Layout = ({ onLogout, children }) => {
+// 1. Ahora Layout recibe 'userRole' como prop
+const Layout = ({ onLogout, children, userRole }) => {
     const [mobileOpen, setMobileOpen] = useState(false);
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
     };
 
-    // Añadimos el nuevo item al menú
-    const menuItems = [
-        { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-        { text: 'Punto de Venta', icon: <PointOfSaleIcon />, path: '/pos' },
-        { text: 'Gestión', icon: <InventoryIcon />, path: '/management' },
-        { text: 'Historial de Ventas', icon: <ReceiptLongIcon />, path: '/history' },
-        { text: 'Categorías', icon: <CategoryIcon />, path: '/categories' },
+    // 2. Definimos qué roles pueden ver cada item del menú
+    const allMenuItems = [
+        { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard', roles: ['admin', 'cashier'] },
+        { text: 'Punto de Venta', icon: <PointOfSaleIcon />, path: '/pos', roles: ['admin', 'cashier'] },
+        { text: 'Gestión', icon: <InventoryIcon />, path: '/management', roles: ['admin'] },
+        { text: 'Historial de Ventas', icon: <ReceiptLongIcon />, path: '/history', roles: ['admin'] },
+        { text: 'Categorías', icon: <CategoryIcon />, path: '/categories', roles: ['admin'] },
     ];
+
+    // 3. Filtramos el menú para mostrar solo los items permitidos para el rol actual
+    const visibleMenuItems = allMenuItems.filter(item => item.roles.includes(userRole));
 
     const drawerContent = (
         <div>
             <Box sx={{ height: headerHeight, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <img src={logo} alt="Logo Cherry Market" style={{ height: 70, width: 70, borderRadius: '50%' }} />
+                <img src={logo} alt="Logo Cherry Market" style={{ height: 60 }} />
             </Box>
             <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.2)' }} />
             <List>
-                {menuItems.map((item) => (
+                {/* 4. Usamos la lista filtrada 'visibleMenuItems' */}
+                {visibleMenuItems.map((item) => (
                     <ListItem key={item.text} disablePadding component={RouterLink} to={item.path} sx={{ color: 'white' }}>
                         <ListItemButton>
                             <ListItemIcon sx={{ color: 'white' }}>{item.icon}</ListItemIcon>

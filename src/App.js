@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'; // LÍNEA CORREGIDA
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { jwtDecode } from 'jwt-decode'; // 1. Importamos el decodificador
 
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './theme';
@@ -20,7 +21,7 @@ import PosView from './PosView';
 import SalesHistory from './SalesHistory';
 import CategoryManager from './CategoryManager';
 
-// Pequeño componente para proteger las rutas
+// El componente ProtectedRoute no necesita cambios
 const ProtectedRoute = ({ isLoggedIn, children }) => {
     if (!isLoggedIn) {
         return <Navigate to="/login" />;
@@ -29,20 +30,36 @@ const ProtectedRoute = ({ isLoggedIn, children }) => {
 };
 
 function App() {
-    const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userRole, setUserRole] = useState(null); // 2. Nuevo estado para el rol
 
     useEffect(() => {
         const token = localStorage.getItem('token');
-        setIsLoggedIn(!!token);
+        if (token) {
+            try {
+                const decodedToken = jwtDecode(token);
+                setUserRole(decodedToken.role); // Guardamos el rol
+                setIsLoggedIn(true);
+            } catch (error) {
+                // Si el token es inválido, lo borramos
+                localStorage.removeItem('token');
+            }
+        }
     }, []);
 
     const handleLoginSuccess = () => {
-        setIsLoggedIn(true);
+        const token = localStorage.getItem('token');
+        if (token) {
+            const decodedToken = jwtDecode(token);
+            setUserRole(decodedToken.role); // Guardamos el rol al iniciar sesión
+            setIsLoggedIn(true);
+        }
     };
 
     const handleLogout = () => {
         localStorage.removeItem('token');
         setIsLoggedIn(false);
+        setUserRole(null); // Limpiamos el rol
     };
 
     return (
@@ -52,33 +69,31 @@ function App() {
                 <ToastContainer position="bottom-center" autoClose={2000} hideProgressBar />
                 <BrowserRouter>
                     <Routes>
-                        {/* Rutas Públicas */}
                         <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
                         <Route path="/register" element={<RegisterPage />} />
 
-                        {/* Rutas Protegidas */}
+                        {/* 3. Pasamos el rol del usuario al Layout */}
                         <Route
                             path="/dashboard"
-                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout}><Dashboard /></Layout></ProtectedRoute>}
+                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout} userRole={userRole}><Dashboard /></Layout></ProtectedRoute>}
                         />
                         <Route
                             path="/pos"
-                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout}><PosView /></Layout></ProtectedRoute>}
+                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout} userRole={userRole}><PosView /></Layout></ProtectedRoute>}
                         />
                         <Route
                             path="/management"
-                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout}><ManagementView /></Layout></ProtectedRoute>}
+                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout} userRole={userRole}><ManagementView /></Layout></ProtectedRoute>}
                         />
                         <Route
                             path="/history"
-                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout}><SalesHistory /></Layout></ProtectedRoute>}
+                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout} userRole={userRole}><SalesHistory /></Layout></ProtectedRoute>}
                         />
                         <Route
                             path="/categories"
-                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout}><CategoryManager /></Layout></ProtectedRoute>}
+                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout} userRole={userRole}><CategoryManager /></Layout></ProtectedRoute>}
                         />
-
-                        {/* Redirección por defecto */}
+                        
                         <Route path="*" element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} />} />
                     </Routes>
                 </BrowserRouter>
