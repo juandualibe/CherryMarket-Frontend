@@ -1,7 +1,8 @@
-// frontend/src/ProductItem.js
 import React, { useState } from 'react';
 import axios from 'axios';
-import { toast } from 'react-toastify'; // 1. Importamos toast
+import { toast } from 'react-toastify';
+import { Card, CardContent, CardActions, Typography, Button, TextField, Box } from '@mui/material';
+
 
 const ProductItem = ({ product, onDataChanged }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -9,9 +10,8 @@ const ProductItem = ({ product, onDataChanged }) => {
 
     const handleDelete = () => {
         if (window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-            axios.delete(`http://localhost:5000/api/products/${product.id}`)
+            axios.delete(`${process.env.REACT_APP_API_URL}/api/products/${product.id}`)
                 .then(() => {
-                    // 2. Reemplazamos el feedback por un toast
                     toast.info('Producto eliminado.');
                     onDataChanged();
                 })
@@ -24,9 +24,8 @@ const ProductItem = ({ product, onDataChanged }) => {
 
     const handleUpdate = (e) => {
         e.preventDefault();
-        axios.put(`http://localhost:5000/api/products/${product.id}`, editData)
+        axios.put(`${process.env.REACT_APP_API_URL}/api/products/${product.id}`, editData)
             .then(() => {
-                // 3. Añadimos un toast de éxito
                 toast.success('Producto actualizado.');
                 setIsEditing(false);
                 onDataChanged();
@@ -42,34 +41,34 @@ const ProductItem = ({ product, onDataChanged }) => {
         setEditData({ ...editData, [name]: value });
     };
 
-    // --- VISTA NORMAL (SIN EDITAR) ---
+    // Este return asume que ya refactorizaste a MUI.
     if (!isEditing) {
         return (
-            <li className="product-item">
-                <div className="product-item-info">
-                    {product.name} - ${product.price} (Stock: {product.stock})
-                </div>
-                <div className="product-item-actions">
-                    <button onClick={() => setIsEditing(true)} className="btn-edit">Editar</button>
-                    <button onClick={handleDelete} className="btn-delete">Eliminar</button>
-                </div>
-            </li>
+            <Card sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <CardContent sx={{ flexGrow: 1 }}>
+                    <Typography variant="h6">{product.name}</Typography>
+                    <Typography color="text.secondary">
+                        ${product.price} - Stock: {product.stock}
+                    </Typography>
+                </CardContent>
+                <CardActions>
+                    <Button size="small" onClick={() => setIsEditing(true)}>Editar</Button>
+                    <Button size="small" color="error" onClick={handleDelete}>Eliminar</Button>
+                </CardActions>
+            </Card>
         );
     }
-
-    // --- VISTA DE EDICIÓN ---
+    
     return (
-        <li className="product-item">
-            <form onSubmit={handleUpdate} className="product-edit-form">
-                <input type="text" name="name" value={editData.name} onChange={handleInputChange} className="edit-input" />
-                <input type="number" name="price" value={editData.price} onChange={handleInputChange} className="edit-input" />
-                <input type="number" name="stock" value={editData.stock} onChange={handleInputChange} className="edit-input" />
-                <div className="product-item-actions">
-                    <button type="submit" className="btn-save">Guardar</button>
-                    <button type="button" onClick={() => setIsEditing(false)}>Cancelar</button>
-                </div>
-            </form>
-        </li>
+        <Card sx={{ mb: 2, p: 2 }}>
+            <Box component="form" onSubmit={handleUpdate} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <TextField size="small" name="name" value={editData.name} onChange={handleInputChange} sx={{ flex: 3 }} />
+                <TextField size="small" name="price" type="number" value={editData.price} onChange={handleInputChange} sx={{ flex: 1 }} />
+                <TextField size="small" name="stock" type="number" value={editData.stock} onChange={handleInputChange} sx={{ flex: 1 }} />
+                <Button type="submit" size="small" variant="contained" color="success">Guardar</Button>
+                <Button size="small" onClick={() => setIsEditing(false)}>Cancelar</Button>
+            </Box>
+        </Card>
     );
 };
 

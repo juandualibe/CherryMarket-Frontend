@@ -6,22 +6,17 @@ import AddProductForm from './AddProductForm';
 import { Box } from '@mui/material';
 
 const ManagementView = () => {
-    // Estado para la lista de productos
     const [products, setProducts] = useState([]);
-    // Estado para el indicador de carga
     const [isLoading, setIsLoading] = useState(false);
-    // Estado para forzar la actualización de la lista
     const [refresh, setRefresh] = useState(false);
 
-    // Función para forzar la actualización
     const handleDataChange = () => {
         setRefresh(!refresh);
     };
 
-    // useEffect para obtener los productos cada vez que 'refresh' cambia
     useEffect(() => {
         setIsLoading(true);
-        axios.get('http://localhost:5000/api/products')
+        axios.get(`${process.env.REACT_APP_API_URL}/api/products`)
             .then(response => {
                 setProducts(response.data);
             })

@@ -1,72 +1,50 @@
-// frontend/src/AddProductForm.js
 import React, { useState } from 'react';
 import axios from 'axios';
-import { toast } from 'react-toastify'; // 1. Importamos toast
+import { toast } from 'react-toastify';
+import { Box, TextField, Button, Typography, Paper } from '@mui/material';
 
-// 1. CAMBIAMOS EL NOMBRE DE LA PROP AQUÍ
+
 const AddProductForm = ({ onDataChanged }) => {
-    // Un estado para cada campo del formulario
     const [name, setName] = useState('');
     const [price, setPrice] = useState('');
     const [stock, setStock] = useState('');
     const [barcode, setBarcode] = useState('');
 
     const handleSubmit = (e) => {
-        e.preventDefault(); // Previene que la página se recargue al enviar
+        e.preventDefault();
+        const newProduct = { name, price, stock, barcode };
 
-        const newProduct = {
-            name,
-            price: parseFloat(price), // Convertimos el precio a número
-            stock: parseInt(stock, 10), // Convertimos el stock a número
-            barcode
-        };
-
-        axios.post('http://localhost:5000/api/products', newProduct)
+        axios.post(`${process.env.REACT_APP_API_URL}/api/products`, newProduct)
             .then(response => {
-                // 2. Reemplazamos alert por toast.success
                 toast.success('¡Producto añadido con éxito!');
-                // ... (limpiamos el formulario)
+                // Limpiamos los campos del formulario
+                setName('');
+                setPrice('');
+                setStock('');
+                setBarcode('');
                 onDataChanged();
             })
             .catch(error => {
-                // 3. Reemplazamos el alert de error
                 toast.error('Error al añadir producto.');
                 console.error('Hubo un error al añadir el producto:', error);
             });
     };
 
-
+    // Este return asume que ya refactorizaste a MUI.
+    // Si no lo hiciste, usa tu JSX anterior.
     return (
-        <form onSubmit={handleSubmit}>
-            <h3>Añadir Nuevo Producto</h3>
-            <input
-                type="text"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                placeholder="Nombre del producto"
-                required
-            />
-            <input
-                type="number"
-                value={price}
-                onChange={e => setPrice(e.target.value)}
-                placeholder="Precio"
-                required
-            />
-            <input
-                type="number"
-                value={stock}
-                onChange={e => setStock(e.target.value)}
-                placeholder="Stock"
-            />
-            <input
-                type="text"
-                value={barcode}
-                onChange={e => setBarcode(e.target.value)}
-                placeholder="Código de barras"
-            />
-            <button type="submit">Añadir Producto</button>
-        </form>
+        <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+            <Typography variant="h5" component="h3" gutterBottom>
+                Añadir Nuevo Producto
+            </Typography>
+            <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField label="Nombre del producto" variant="outlined" value={name} onChange={e => setName(e.target.value)} required />
+                <TextField label="Precio" type="number" variant="outlined" value={price} onChange={e => setPrice(e.target.value)} required />
+                <TextField label="Stock" type="number" variant="outlined" value={stock} onChange={e => setStock(e.target.value)} />
+                <TextField label="Código de barras" variant="outlined" value={barcode} onChange={e => setBarcode(e.target.value)} />
+                <Button type="submit" variant="contained" color="primary">Añadir Producto</Button>
+            </Box>
+        </Paper>
     );
 };
 
