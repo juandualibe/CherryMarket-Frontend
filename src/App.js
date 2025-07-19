@@ -21,53 +21,53 @@ import PosView from './PosView';
 import SalesHistory from './SalesHistory';
 import CategoryManager from './CategoryManager';
 
+// Función para obtener el estado inicial del token
+const getInitialAuthState = () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        try {
+            const decoded = jwtDecode(token);
+            return { isLoggedIn: true, userRole: decoded.role };
+        } catch (e) {
+            return { isLoggedIn: false, userRole: null };
+        }
+    }
+    return { isLoggedIn: false, userRole: null };
+};
+
+// Componente para proteger rutas generales
 const ProtectedRoute = ({ isLoggedIn, children }) => {
     if (!isLoggedIn) {
-        return <Navigate to="/login" />;
+        return <Navigate to="/login" replace />;
     }
     return children;
 };
 
+// Componente para proteger rutas de administradores
 const AdminRoute = ({ isLoggedIn, userRole, children }) => {
     if (!isLoggedIn) {
-        return <Navigate to="/login" />;
+        return <Navigate to="/login" replace />;
     }
     if (userRole !== 'admin') {
-        return <Navigate to="/dashboard" />;
+        return <Navigate to="/dashboard" replace />;
     }
     return children;
 };
 
 function App() {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userRole, setUserRole] = useState(null);
-
-    useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            try {
-                const decodedToken = jwtDecode(token);
-                setUserRole(decodedToken.role);
-                setIsLoggedIn(true);
-            } catch (error) {
-                localStorage.removeItem('token');
-            }
-        }
-    }, []);
+    const [authState, setAuthState] = useState(getInitialAuthState());
 
     const handleLoginSuccess = () => {
         const token = localStorage.getItem('token');
         if (token) {
             const decodedToken = jwtDecode(token);
-            setUserRole(decodedToken.role);
-            setIsLoggedIn(true);
+            setAuthState({ isLoggedIn: true, userRole: decodedToken.role });
         }
     };
 
     const handleLogout = () => {
         localStorage.removeItem('token');
-        setIsLoggedIn(false);
-        setUserRole(null);
+        setAuthState({ isLoggedIn: false, userRole: null });
     };
 
     return (
@@ -82,26 +82,26 @@ function App() {
 
                         <Route
                             path="/dashboard"
-                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout} userRole={userRole}><Dashboard userRole={userRole} /></Layout></ProtectedRoute>}
+                            element={<ProtectedRoute isLoggedIn={authState.isLoggedIn}><Layout onLogout={handleLogout} userRole={authState.userRole}><Dashboard userRole={authState.userRole} /></Layout></ProtectedRoute>}
                         />
                         <Route
                             path="/pos"
-                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout} userRole={userRole}><PosView /></Layout></ProtectedRoute>}
+                            element={<ProtectedRoute isLoggedIn={authState.isLoggedIn}><Layout onLogout={handleLogout} userRole={authState.userRole}><PosView /></Layout></ProtectedRoute>}
                         />
                         <Route
                             path="/management"
-                            element={<AdminRoute isLoggedIn={isLoggedIn} userRole={userRole}><Layout onLogout={handleLogout} userRole={userRole}><ManagementView /></Layout></AdminRoute>}
+                            element={<AdminRoute isLoggedIn={authState.isLoggedIn} userRole={authState.userRole}><Layout onLogout={handleLogout} userRole={authState.userRole}><ManagementView /></Layout></AdminRoute>}
                         />
                         <Route
                             path="/history"
-                            element={<AdminRoute isLoggedIn={isLoggedIn} userRole={userRole}><Layout onLogout={handleLogout} userRole={userRole}><SalesHistory /></Layout></AdminRoute>}
+                            element={<AdminRoute isLoggedIn={authState.isLoggedIn} userRole={authState.userRole}><Layout onLogout={handleLogout} userRole={authState.userRole}><SalesHistory /></Layout></AdminRoute>}
                         />
                         <Route
                             path="/categories"
-                            element={<AdminRoute isLoggedIn={isLoggedIn} userRole={userRole}><Layout onLogout={handleLogout} userRole={userRole}><CategoryManager /></Layout></AdminRoute>}
+                            element={<AdminRoute isLoggedIn={authState.isLoggedIn} userRole={authState.userRole}><Layout onLogout={handleLogout} userRole={authState.userRole}><CategoryManager /></Layout></AdminRoute>}
                         />
                         
-                        <Route path="*" element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} />} />
+                        <Route path="*" element={<Navigate to={authState.isLoggedIn ? "/dashboard" : "/login"} />} />
                     </Routes>
                 </BrowserRouter>
             </LocalizationProvider>
