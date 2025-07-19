@@ -21,7 +21,6 @@ import PosView from './PosView';
 import SalesHistory from './SalesHistory';
 import CategoryManager from './CategoryManager';
 
-// Componente para proteger rutas generales
 const ProtectedRoute = ({ isLoggedIn, children }) => {
     if (!isLoggedIn) {
         return <Navigate to="/login" />;
@@ -29,18 +28,15 @@ const ProtectedRoute = ({ isLoggedIn, children }) => {
     return children;
 };
 
-// Nuevo componente para proteger rutas SOLO de administradores
 const AdminRoute = ({ isLoggedIn, userRole, children }) => {
     if (!isLoggedIn) {
         return <Navigate to="/login" />;
     }
     if (userRole !== 'admin') {
-        // Si no es admin, lo mandamos al dashboard
         return <Navigate to="/dashboard" />;
     }
     return children;
 };
-
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -84,17 +80,14 @@ function App() {
                         <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
                         <Route path="/register" element={<RegisterPage />} />
 
-                        {/* Rutas para TODOS los usuarios logueados */}
                         <Route
                             path="/dashboard"
-                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout} userRole={userRole}><Dashboard /></Layout></ProtectedRoute>}
+                            element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout} userRole={userRole}><Dashboard userRole={userRole} /></Layout></ProtectedRoute>}
                         />
                         <Route
                             path="/pos"
                             element={<ProtectedRoute isLoggedIn={isLoggedIn}><Layout onLogout={handleLogout} userRole={userRole}><PosView /></Layout></ProtectedRoute>}
                         />
-
-                        {/* Rutas SOLO PARA ADMINS */}
                         <Route
                             path="/management"
                             element={<AdminRoute isLoggedIn={isLoggedIn} userRole={userRole}><Layout onLogout={handleLogout} userRole={userRole}><ManagementView /></Layout></AdminRoute>}
