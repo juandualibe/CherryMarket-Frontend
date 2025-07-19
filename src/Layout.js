@@ -37,7 +37,7 @@ const Layout = ({ onLogout, children, userRole }) => {
     const drawerContent = (
         <div>
             <Box sx={{ height: headerHeight, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <img src={logo} alt="Logo Cherry Market" style={{ height: 60 }} />
+                <img src={logo} alt="Logo Cherry Market" style={{ height: 70, borderRadius: 50 }} />
             </Box>
             <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.2)' }} />
             <List>
