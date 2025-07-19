@@ -2,27 +2,30 @@ import React, { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { Container, Box, Typography, TextField, Button, Paper, Link } from '@mui/material';
+import { Container, Box, Typography, TextField, Button, Paper, Link, IconButton, InputAdornment } from '@mui/material';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 const RegisterPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false); // Nuevo estado
     const navigate = useNavigate();
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const newUser = { username, password };
-
-        axios.post(`${process.env.REACT_APP_API_URL}/api/auth/register`, newUser)
-            .then(response => {
+        axios.post(`${process.env.REACT_APP_API_URL}/api/auth/register`, { username, password })
+            .then(() => {
                 toast.success('¡Usuario registrado con éxito! Ahora puedes iniciar sesión.');
-                navigate('/login'); // Redirige al login después del registro exitoso
+                navigate('/login');
             })
             .catch(error => {
-                const message = error.response?.data?.message || 'Error al registrar el usuario.';
-                toast.error(message);
+                toast.error(error.response?.data?.message || 'Error al registrar el usuario.');
             });
     };
+    
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleMouseDownPassword = (event) => event.preventDefault();
 
     return (
         <Container component="main" maxWidth="sm">
@@ -35,9 +38,7 @@ const RegisterPage = () => {
                         margin="normal"
                         required
                         fullWidth
-                        id="username"
                         label="Nombre de Usuario"
-                        name="username"
                         autoComplete="username"
                         autoFocus
                         value={username}
@@ -49,18 +50,26 @@ const RegisterPage = () => {
                         fullWidth
                         name="password"
                         label="Contraseña"
-                        type="password"
-                        id="password"
+                        type={showPassword ? 'text' : 'password'} // Cambia el tipo dinámicamente
                         autoComplete="new-password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        InputProps={{ // Aquí añadimos el ícono
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle password visibility"
+                                        onClick={handleClickShowPassword}
+                                        onMouseDown={handleMouseDownPassword}
+                                        edge="end"
+                                    >
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                     />
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        sx={{ mt: 3, mb: 2 }}
-                    >
+                    <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
                         Registrarse
                     </Button>
                     <Typography align="center">
