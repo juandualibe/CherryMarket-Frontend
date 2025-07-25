@@ -1,36 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import apiClient from './api'; // Usamos apiClient que ya tiene la URL base
-import { Typography, Box, Paper, Grid, Button, Chip, CircularProgress, TextField } from '@mui/material'; // Chip es nuevo
+import apiClient from './api';
+import { Typography, Box, Paper, Grid, Button, Chip, CircularProgress, TextField } from '@mui/material';
 import { toast } from 'react-toastify';
 
-// Recibe los productos y el estado de carga como props
 const ProductCatalog = ({ products, isLoading, onAddToCart }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredProducts, setFilteredProducts] = useState([]);
-    
-    // --- NUEVOS ESTADOS PARA CATEGORÍAS ---
     const [categories, setCategories] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState('all'); // 'all' es la categoría por defecto
+    const [selectedCategory, setSelectedCategory] = useState('all');
 
-    // useEffect para obtener las categorías una sola vez
     useEffect(() => {
         apiClient.get('/api/categories')
-            .then(response => {
-                setCategories(response.data);
-            })
-            .catch(() => toast.error('Error al cargar las categorías para el filtro.'));
+            .then(response => setCategories(response.data))
+            .catch(() => toast.error('Error al cargar las categorías.'));
     }, []);
 
-    // useEffect para aplicar TODOS los filtros (búsqueda y categoría)
     useEffect(() => {
         let results = products;
 
-        // 1. Filtrar por categoría seleccionada
         if (selectedCategory !== 'all') {
             results = results.filter(product => product.category_id === selectedCategory);
         }
 
-        // 2. Filtrar por término de búsqueda sobre los resultados anteriores
         if (searchTerm) {
             results = results.filter(product =>
                 product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -39,8 +30,25 @@ const ProductCatalog = ({ products, isLoading, onAddToCart }) => {
         }
 
         setFilteredProducts(results);
-    }, [searchTerm, products, selectedCategory]); // Se re-ejecuta si cambia cualquiera de estos
+    }, [searchTerm, products, selectedCategory]);
 
+    // --- NUEVA FUNCIÓN PARA MANEJAR EL ESCANEO ---
+    const handleBarcodeScan = (event) => {
+        // Verificamos si la tecla presionada es 'Enter'
+        if (event.key === 'Enter' && searchTerm.trim() !== '') {
+            event.preventDefault(); // Evita cualquier comportamiento por defecto del Enter
+
+            // Buscamos un producto cuyo código de barras coincida EXACTAMENTE
+            const foundProduct = products.find(p => p.barcode === searchTerm.trim());
+
+            if (foundProduct) {
+                onAddToCart(foundProduct); // Si lo encontramos, lo añadimos al carrito
+                setSearchTerm(''); // Limpiamos la barra de búsqueda para el siguiente escaneo
+            } else {
+                toast.warn('Producto no encontrado por código de barras.');
+            }
+        }
+    };
 
     return (
         <Paper elevation={3} sx={{p: 2}}>
@@ -49,14 +57,14 @@ const ProductCatalog = ({ products, isLoading, onAddToCart }) => {
             </Typography>
             <TextField
                 fullWidth
-                label="Buscar por nombre o código de barras..."
+                label="Buscar por nombre o escanear código de barras..."
                 variant="outlined"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
+                onKeyDown={handleBarcodeScan} // --- AÑADIMOS EL DETECTOR DE TECLAS AQUÍ ---
                 sx={{ mb: 2 }}
             />
 
-            {/* Contenedor de los filtros de categoría */}
             <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 <Chip
                     label="Todos"
