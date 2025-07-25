@@ -1,24 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import apiClient from './api';
-import { Typography, Paper, Grid, Box, CircularProgress } from '@mui/material';
+import { Typography, Paper, Grid, Box, CircularProgress, List, ListItem, ListItemText, Divider } from '@mui/material';
 import { toast } from 'react-toastify';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { subDays, format, parseISO } from 'date-fns';
 
-const Dashboard = ({ userRole }) => { // 1. Recibimos el rol como prop
+const Dashboard = ({ userRole }) => {
     const [stats, setStats] = useState(null);
     const [salesData, setSalesData] = useState([]);
+    const [topProducts, setTopProducts] = useState([]); // Nuevo estado para los productos top
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
             setIsLoading(true);
             try {
-                // La petición de estadísticas es para todos
+                // Preparamos las peticiones a la API
                 const statsPromise = apiClient.get('/api/dashboard/stats');
+                const topProductsPromise = apiClient.get('/api/reports/top-selling-products?limit=5');
+                
+                let promises = [statsPromise, topProductsPromise];
 
                 // La petición del gráfico de ventas es SOLO para admins
-                const promises = [statsPromise];
                 if (userRole === 'admin') {
                     const endDate = new Date();
                     const startDate = subDays(endDate, 6);
@@ -29,8 +32,9 @@ const Dashboard = ({ userRole }) => { // 1. Recibimos el rol como prop
                 const responses = await Promise.all(promises);
 
                 setStats(responses[0].data);
-                if (responses[1]) {
-                    setSalesData(responses[1].data);
+                setTopProducts(responses[1].data);
+                if (responses[2]) {
+                    setSalesData(responses[2].data);
                 }
 
             } catch (error) {
@@ -42,7 +46,7 @@ const Dashboard = ({ userRole }) => { // 1. Recibimos el rol como prop
         };
 
         fetchDashboardData();
-    }, [userRole]); // Se re-ejecuta si el rol cambia
+    }, [userRole]);
 
     if (isLoading) {
         return (
@@ -58,44 +62,44 @@ const Dashboard = ({ userRole }) => { // 1. Recibimos el rol como prop
 
     return (
         <Box>
-            <Typography variant="h4" gutterBottom>
-                Dashboard
-            </Typography>
+            <Typography variant="h4" gutterBottom>Dashboard</Typography>
             <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} sm={6} md={4}>
                     <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 240, justifyContent: 'center', textAlign: 'center' }}>
-                        <Typography variant="h6" color="primary" gutterBottom>
-                            Ventas del Día
-                        </Typography>
-                        <Typography component="p" variant="h4">
-                            ${stats.totalSalesToday.toFixed(2)}
-                        </Typography>
-                        <Typography color="text.secondary" sx={{ flex: 1, mt: 2 }}>
-                            Total registrado hoy ({new Date().toLocaleDateString('es-AR')})
-                        </Typography>
+                        <Typography variant="h6" color="primary" gutterBottom>Ventas del Día</Typography>
+                        <Typography component="p" variant="h4">${stats.totalSalesToday.toFixed(2)}</Typography>
                     </Paper>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} sm={6} md={4}>
                     <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 240, justifyContent: 'center', textAlign: 'center' }}>
-                         <Typography variant="h6" color="primary" gutterBottom>
-                            Productos con Bajo Stock
+                         <Typography variant="h6" color="primary" gutterBottom>Productos con Bajo Stock</Typography>
+                        <Typography component="p" variant="h4">{stats.lowStockCount}</Typography>
+                    </Paper>
+                </Grid>
+
+                {/* --- NUEVA TARJETA: PRODUCTOS MÁS VENDIDOS --- */}
+                <Grid item xs={12} md={4}>
+                    <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 240 }}>
+                        <Typography variant="h6" color="primary" gutterBottom>
+                            Productos Más Vendidos
                         </Typography>
-                        <Typography component="p" variant="h4">
-                            {stats.lowStockCount}
-                        </Typography>
-                        <Typography color="text.secondary" sx={{ flex: 1, mt: 2 }}>
-                            Productos con menos de 10 unidades.
-                        </Typography>
+                        <List>
+                            {topProducts.map((product, index) => (
+                                <ListItem key={index} disablePadding>
+                                    <ListItemText 
+                                        primary={`${index + 1}. ${product.name}`} 
+                                        secondary={`Vendidos: ${product.total_sold}`} 
+                                    />
+                                </ListItem>
+                            ))}
+                        </List>
                     </Paper>
                 </Grid>
                 
-                {/* 2. Mostramos el gráfico SOLO si el usuario es admin */}
                 {userRole === 'admin' && (
                     <Grid item xs={12}>
                         <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 350 }}>
-                            <Typography variant="h6" color="primary" gutterBottom>
-                                Ventas de la Última Semana
-                            </Typography>
+                            <Typography variant="h6" color="primary" gutterBottom>Ventas de la Última Semana</Typography>
                             <ResponsiveContainer>
                                 <BarChart data={salesData} margin={{ top: 5, right: 20, left: 30, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" />
