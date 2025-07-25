@@ -1,30 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import apiClient from './api';
-import { Typography, Paper, Grid, Box, CircularProgress, List, ListItem, ListItemText, Divider } from '@mui/material';
+import { Typography, Paper, Grid, Box, CircularProgress, List, ListItem, ListItemText } from '@mui/material';
 import { toast } from 'react-toastify';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { subDays, format, parseISO } from 'date-fns';
+import { subDays, format } from 'date-fns';
 
 const Dashboard = ({ userRole }) => {
     const [stats, setStats] = useState(null);
     const [salesData, setSalesData] = useState([]);
-    const [topProducts, setTopProducts] = useState([]); // Nuevo estado para los productos top
+    const [topProducts, setTopProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
             setIsLoading(true);
             try {
-                // Preparamos las peticiones a la API
+                const endDate = new Date();
+                const startDate = subDays(endDate, 6);
+
                 const statsPromise = apiClient.get('/api/dashboard/stats');
                 const topProductsPromise = apiClient.get('/api/reports/top-selling-products?limit=5');
                 
                 let promises = [statsPromise, topProductsPromise];
 
-                // La petición del gráfico de ventas es SOLO para admins
                 if (userRole === 'admin') {
-                    const endDate = new Date();
-                    const startDate = subDays(endDate, 6);
                     const salesPromise = apiClient.get(`/api/reports/sales-summary?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`);
                     promises.push(salesPromise);
                 }
@@ -60,6 +59,13 @@ const Dashboard = ({ userRole }) => {
         return <Typography>No se pudieron cargar las estadísticas.</Typography>;
     }
 
+    const formatYAxis = (tickItem) => {
+        if (tickItem >= 1000) {
+            return `$${(tickItem / 1000).toLocaleString('es-AR')}k`;
+        }
+        return `$${tickItem}`;
+    }
+
     return (
         <Box>
             <Typography variant="h4" gutterBottom>Dashboard</Typography>
@@ -76,12 +82,10 @@ const Dashboard = ({ userRole }) => {
                         <Typography component="p" variant="h4">{stats.lowStockCount}</Typography>
                     </Paper>
                 </Grid>
-
-                {/* --- NUEVA TARJETA: PRODUCTOS MÁS VENDIDOS --- */}
                 <Grid item xs={12} md={4}>
                     <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 240 }}>
                         <Typography variant="h6" color="primary" gutterBottom>
-                            Productos Más Vendidos
+                            Top 5 Productos Vendidos
                         </Typography>
                         <List>
                             {topProducts.map((product, index) => (
@@ -103,8 +107,10 @@ const Dashboard = ({ userRole }) => {
                             <ResponsiveContainer>
                                 <BarChart data={salesData} margin={{ top: 5, right: 20, left: 30, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="date" tickFormatter={(dateStr) => format(parseISO(dateStr), 'dd/MM')} />
-                                    <YAxis tickFormatter={(tick) => `$${tick.toLocaleString()}`} />
+                                    {/* --- CORRECCIÓN FINAL --- */}
+                                    {/* Quitamos el formateador. El dato ya viene listo del backend. */}
+                                    <XAxis dataKey="date" />
+                                    <YAxis tickFormatter={formatYAxis} />
                                     <Tooltip />
                                     <Legend />
                                     <Bar dataKey="total" fill="#e53935" name="Ventas ($)" maxBarSize={50} />
