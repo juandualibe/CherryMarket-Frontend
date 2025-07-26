@@ -3,7 +3,7 @@ import apiClient from './api';
 import { Typography, Paper, Grid, Box, CircularProgress, List, ListItem, ListItemText } from '@mui/material';
 import { toast } from 'react-toastify';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { subDays, format } from 'date-fns';
+import { subDays, format, parseISO } from 'date-fns';
 
 const Dashboard = ({ userRole }) => {
     const [stats, setStats] = useState(null);
@@ -38,7 +38,7 @@ const Dashboard = ({ userRole }) => {
 
             } catch (error) {
                 toast.error('Error al cargar los datos del dashboard.');
-                console.error("Error al cargar datos del dashboard:", error);
+                console.error("Error detallado al cargar datos del dashboard:", error);
             } finally {
                 setIsLoading(false);
             }
@@ -64,7 +64,7 @@ const Dashboard = ({ userRole }) => {
             return `$${(tickItem / 1000).toLocaleString('es-AR')}k`;
         }
         return `$${tickItem}`;
-    }
+    };
 
     return (
         <Box>
@@ -107,9 +107,10 @@ const Dashboard = ({ userRole }) => {
                             <ResponsiveContainer>
                                 <BarChart data={salesData} margin={{ top: 5, right: 20, left: 30, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" />
-                                    {/* --- CORRECCIÓN FINAL --- */}
-                                    {/* Quitamos el formateador. El dato ya viene listo del backend. */}
-                                    <XAxis dataKey="date" />
+                                    <XAxis 
+                                        dataKey="date" 
+                                        tickFormatter={(dateStr) => format(parseISO(dateStr), 'dd/MM')}
+                                    />
                                     <YAxis tickFormatter={formatYAxis} />
                                     <Tooltip />
                                     <Legend />
