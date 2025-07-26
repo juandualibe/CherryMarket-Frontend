@@ -1,12 +1,14 @@
 // frontend/src/Calculator.js
-import React, { useState, useEffect } from 'react';
-import { Paper, Grid, Button, Typography, Box } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import { Paper, Grid, Button, Typography, Box, TextField } from '@mui/material';
 
 const Calculator = () => {
   const [display, setDisplay] = useState('0');
   const [currentNumber, setCurrentNumber] = useState('');
   const [operator, setOperator] = useState(null);
   const [previousNumber, setPreviousNumber] = useState(null);
+  const [isFocused, setIsFocused] = useState(false);
+  const inputRef = useRef(null);
 
   const handleNumber = (num) => {
     if (display === '0' && num !== '.') {
@@ -16,6 +18,7 @@ const Calculator = () => {
       setDisplay(display + num);
       setCurrentNumber(currentNumber + num);
     }
+    inputRef.current?.focus(); // Mantiene el foco en el TextField tras usar botones
   };
 
   const handleOperator = (op) => {
@@ -24,6 +27,7 @@ const Calculator = () => {
     setOperator(op);
     setDisplay(display + ' ' + op + ' ');
     setCurrentNumber('');
+    inputRef.current?.focus();
   };
 
   const handleClear = () => {
@@ -31,6 +35,7 @@ const Calculator = () => {
     setCurrentNumber('');
     setOperator(null);
     setPreviousNumber(null);
+    inputRef.current?.focus();
   };
 
   const handleBackspace = () => {
@@ -38,6 +43,7 @@ const Calculator = () => {
     const newCurrent = currentNumber.slice(0, -1);
     setCurrentNumber(newCurrent);
     setDisplay(newCurrent || '0');
+    inputRef.current?.focus();
   };
 
   const handlePercentage = () => {
@@ -46,6 +52,7 @@ const Calculator = () => {
     const percentage = (previousNumber * num2) / 100;
     setCurrentNumber(percentage.toString());
     setDisplay(previousNumber + ' ' + operator + ' ' + percentage);
+    inputRef.current?.focus();
   };
 
   const handleToggleSign = () => {
@@ -57,6 +64,7 @@ const Calculator = () => {
     } else {
       setDisplay(newNumber);
     }
+    inputRef.current?.focus();
   };
 
   const handleCalculate = () => {
@@ -86,11 +94,13 @@ const Calculator = () => {
     setCurrentNumber(result.toString());
     setOperator(null);
     setPreviousNumber(null);
+    inputRef.current?.focus();
   };
 
   // Manejo de teclado
   useEffect(() => {
     const handleKeyDown = (event) => {
+      if (!isFocused) return; // Solo procesa teclas si el TextField está enfocado
       const { key } = event;
       if (/[0-9.]/.test(key)) {
         handleNumber(key);
@@ -111,7 +121,7 @@ const Calculator = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentNumber, operator, previousNumber]);
+  }, [currentNumber, operator, previousNumber, isFocused]);
 
   const buttons = [
     { label: 'C', action: handleClear, color: 'error' },
@@ -133,11 +143,7 @@ const Calculator = () => {
     { label: '0', action: () => handleNumber('0'), span: 2 },
     { label: '.', action: () => handleNumber('.') },
     { label: '=', action: handleCalculate, color: 'success' },
-    { label: '+', action: () => handleOperator('+') },
-    // Espacios vacíos para completar la cuadrícula 4x5
-    { label: '', action: () => {}, disabled: true },
-    { label: '', action: () => {}, disabled: true },
-    { label: '', action: () => {}, disabled: true },
+    { label: '+', action: () => handleOperator('+') }        
   ];
 
   return (
@@ -146,7 +152,16 @@ const Calculator = () => {
         Calculadora
       </Typography>
       <Box sx={{ mb: 2, p: 1, bgcolor: '#f5f5f5', borderRadius: 1, textAlign: 'right' }}>
-        <Typography variant="h5">{display}</Typography>
+        <TextField
+          inputRef={inputRef}
+          value={display}
+          fullWidth
+          variant="outlined"
+          InputProps={{ readOnly: true }}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          sx={{ input: { textAlign: 'right', fontSize: '1.5rem' } }}
+        />
       </Box>
       <Grid container spacing={1}>
         {buttons.map((button, index) => (
