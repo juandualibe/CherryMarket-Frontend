@@ -4,6 +4,7 @@ import apiClient from './api';
 import { toast } from 'react-toastify';
 import ProductCatalog from './ProductCatalog';
 import ShoppingCart from './ShoppingCart';
+import Calculator from './Calculator'; // Importar la calculadora
 import { Grid, Paper } from '@mui/material';
 
 const PosView = ({ onSaleSuccess }) => {
@@ -28,10 +29,14 @@ const PosView = ({ onSaleSuccess }) => {
   }, [refreshProducts]);
 
   const addToCart = (productToAdd) => {
+    if (!productToAdd.id && !productToAdd.isManual) {
+      toast.error('Producto inválido.');
+      return;
+    }
     const itemInCart = cart.find((item) => item.id === productToAdd.id);
     const currentQuantityInCart = itemInCart ? itemInCart.quantity : 0;
     if (!productToAdd.isManual && currentQuantityInCart >= productToAdd.stock) {
-      toast.warn('No hay más stock disponible para este producto.');
+      toast.warn(`No hay más stock disponible para ${productToAdd.name}.`);
       return;
     }
     if (itemInCart) {
@@ -49,17 +54,17 @@ const PosView = ({ onSaleSuccess }) => {
 
   const handleQuantityChange = (productId, amount, newItem = null) => {
     if (newItem) {
-      // Añadir ítem manual
       setCart([...cart, { ...newItem, id: productId, quantity: amount }]);
       return;
     }
 
     const productInCatalog = products.find((p) => p.id === productId);
     const itemInCart = cart.find((item) => item.id === productId);
-    if (!itemInCart) return;
+    if (!itemInCart || !productInCatalog) return;
 
-    if (amount > 0 && !itemInCart.isManual && itemInCart.quantity + amount > productInCatalog.stock) {
-      toast.warn('No se puede añadir más, stock máximo alcanzado.');
+    const newQuantity = itemInCart.quantity + amount;
+    if (amount > 0 && !itemInCart.isManual && newQuantity > productInCatalog.stock) {
+      toast.warn(`No se puede añadir más de ${productInCatalog.name}. Stock máximo: ${productInCatalog.stock}.`);
       return;
     }
 
@@ -67,7 +72,6 @@ const PosView = ({ onSaleSuccess }) => {
       cart
         .map((item) => {
           if (item.id === productId) {
-            const newQuantity = item.quantity + amount;
             return newQuantity > 0 ? { ...item, quantity: newQuantity } : null;
           }
           return item;
@@ -87,19 +91,20 @@ const PosView = ({ onSaleSuccess }) => {
     }
     const saleData = {
       cart: cart.map(({ id, quantity, price, isManual, name }) => ({
-        id: isManual ? null : id, // Ítems manuales no tienen ID de producto
-        name: isManual ? name : undefined, // Enviar nombre para ítems manuales
+        id: isManual ? null : id,
+        name: isManual ? name : (products.find((p) => p.id === id)?.name || 'Producto desconocido'),
         quantity,
-        price,
+        price: parseFloat(price),
         isManual: !!isManual,
       })),
-      total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+      total: cart.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0),
     };
     apiClient
       .post('/api/sales', saleData)
       .then((response) => {
         toast.success('¡Venta registrada con éxito!');
         setCart([]);
+        apiClient.get('/api/products').then((res) => setProducts(res.data));
         setRefreshProducts((prev) => !prev);
         onSaleSuccess();
       })
@@ -119,14 +124,21 @@ const PosView = ({ onSaleSuccess }) => {
         />
       </Grid>
       <Grid item xs={12} md={5}>
-        <Paper sx={{ p: 2, height: '100%' }}>
-          <ShoppingCart
-            cart={cart}
-            onQuantityChange={handleQuantityChange}
-            onRemoveItem={handleRemoveItem}
-            onFinalizeSale={handleFinalizeSale}
-          />
-        </Paper>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Paper sx={{ p: 2, height: '100%' }}>
+              <ShoppingCart
+                cart={cart}
+                onQuantityChange={handleQuantityChange}
+                onRemoveItem={handleRemoveItem}
+                onFinalizeSale={handleFinalizeSale}
+              />
+            </Paper>
+          </Grid>
+          <Grid item xs={12}>
+            <Calculator />
+          </Grid>
+        </Grid>
       </Grid>
     </Grid>
   );
