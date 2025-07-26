@@ -1,3 +1,4 @@
+// frontend/src/Calculator.js
 import React, { useState, useEffect } from 'react';
 import { Paper, Grid, Button, Typography, Box } from '@mui/material';
 
@@ -87,6 +88,7 @@ const Calculator = () => {
     setPreviousNumber(null);
   };
 
+  // Manejo de teclado
   useEffect(() => {
     const handleKeyDown = (event) => {
       const { key } = event;
@@ -116,30 +118,30 @@ const Calculator = () => {
     { label: '⌫', action: handleBackspace, color: 'secondary' },
     { label: '%', action: handlePercentage },
     { label: '+/-', action: handleToggleSign },
-
     { label: '7', action: () => handleNumber('7') },
     { label: '8', action: () => handleNumber('8') },
     { label: '9', action: () => handleNumber('9') },
-    { label: '*', action: () => handleOperator('*') },
-
+    { label: '/', action: () => handleOperator('/') },
     { label: '4', action: () => handleNumber('4') },
     { label: '5', action: () => handleNumber('5') },
     { label: '6', action: () => handleNumber('6') },
-    { label: '/', action: () => handleOperator('/') },
-
+    { label: '*', action: () => handleOperator('*') },
     { label: '1', action: () => handleNumber('1') },
     { label: '2', action: () => handleNumber('2') },
     { label: '3', action: () => handleNumber('3') },
     { label: '-', action: () => handleOperator('-') },
-
-    { label: '0', action: () => handleNumber('0') },
+    { label: '0', action: () => handleNumber('0'), span: 2 },
     { label: '.', action: () => handleNumber('.') },
     { label: '=', action: handleCalculate, color: 'success' },
     { label: '+', action: () => handleOperator('+') },
+    // Espacios vacíos para completar la cuadrícula 4x5
+    { label: '', action: () => {}, disabled: true },
+    { label: '', action: () => {}, disabled: true },
+    { label: '', action: () => {}, disabled: true },
   ];
 
   return (
-    <Paper elevation={3} sx={{ p: 2, width: '100%', maxWidth: 600 }}>
+    <Paper elevation={3} sx={{ p: 2, maxWidth: 400 }}>
       <Typography variant="h6" gutterBottom>
         Calculadora
       </Typography>
@@ -148,13 +150,14 @@ const Calculator = () => {
       </Box>
       <Grid container spacing={1}>
         {buttons.map((button, index) => (
-          <Grid item xs={3} key={index}>
+          <Grid item xs={button.span || 3} key={index}>
             <Button
               variant="contained"
               color={button.color || 'primary'}
               fullWidth
               onClick={button.action}
               sx={{ fontSize: '1.2rem', height: 50 }}
+              disabled={button.disabled || false}
             >
               {button.label}
             </Button>
