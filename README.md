@@ -150,7 +150,7 @@ Cherry Market ofrece un flujo de usuario completo, desde la autenticación hasta
 5. Abre un Pull Request en GitHub.
 
 ## 📄 Licencia
-Este proyecto está bajo la licencia Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International. Consulta el archivo LICENSE (./LICENSE) para más detalles.
+Este proyecto está bajo la licencia Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International. Consulta el archivo [LICENSE](./LICENSE) para más detalles.
 
 ## 📬 Contacto
 Desarrollado por Juan Dualibe. Para consultas, contáctame en [juandualibe@gmail.com](mailto:juandualibe@gmail.com).
