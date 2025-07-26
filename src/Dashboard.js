@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { subDays, format, parseISO } from 'date-fns';
 
-const Dashboard = ({ userRole }) => {
+const Dashboard = ({ userRole, refreshTrigger }) => {
     const [stats, setStats] = useState(null);
     const [salesData, setSalesData] = useState([]);
     const [topProducts, setTopProducts] = useState([]);
@@ -38,27 +38,23 @@ const Dashboard = ({ userRole }) => {
 
             } catch (error) {
                 toast.error('Error al cargar los datos del dashboard.');
-                console.error("Error detallado al cargar datos del dashboard:", error);
+                console.error("Error al cargar datos del dashboard:", error);
             } finally {
                 setIsLoading(false);
             }
         };
 
         fetchDashboardData();
-    }, [userRole]);
+    }, [userRole, refreshTrigger]);
 
     if (isLoading) {
-        return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-                <CircularProgress />
-            </Box>
-        );
+        return ( <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}><CircularProgress /></Box> );
     }
 
     if (!stats) {
         return <Typography>No se pudieron cargar las estadísticas.</Typography>;
     }
-
+    
     const formatYAxis = (tickItem) => {
         if (tickItem >= 1000) {
             return `$${(tickItem / 1000).toLocaleString('es-AR')}k`;

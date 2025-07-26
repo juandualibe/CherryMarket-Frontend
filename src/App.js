@@ -21,7 +21,6 @@ import PosView from './PosView';
 import SalesHistory from './SalesHistory';
 import CategoryManager from './CategoryManager';
 
-// Función para obtener el estado inicial del token
 const getInitialAuthState = () => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -35,7 +34,6 @@ const getInitialAuthState = () => {
     return { isLoggedIn: false, userRole: null };
 };
 
-// Componente para proteger rutas generales
 const ProtectedRoute = ({ isLoggedIn, children }) => {
     if (!isLoggedIn) {
         return <Navigate to="/login" replace />;
@@ -43,7 +41,6 @@ const ProtectedRoute = ({ isLoggedIn, children }) => {
     return children;
 };
 
-// Componente para proteger rutas de administradores
 const AdminRoute = ({ isLoggedIn, userRole, children }) => {
     if (!isLoggedIn) {
         return <Navigate to="/login" replace />;
@@ -56,6 +53,7 @@ const AdminRoute = ({ isLoggedIn, userRole, children }) => {
 
 function App() {
     const [authState, setAuthState] = useState(getInitialAuthState());
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
 
     const handleLoginSuccess = () => {
         const token = localStorage.getItem('token');
@@ -68,6 +66,10 @@ function App() {
     const handleLogout = () => {
         localStorage.removeItem('token');
         setAuthState({ isLoggedIn: false, userRole: null });
+    };
+    
+    const triggerDataRefresh = () => {
+        setRefreshTrigger(prev => prev + 1);
     };
 
     return (
@@ -82,11 +84,11 @@ function App() {
 
                         <Route
                             path="/dashboard"
-                            element={<ProtectedRoute isLoggedIn={authState.isLoggedIn}><Layout onLogout={handleLogout} userRole={authState.userRole}><Dashboard userRole={authState.userRole} /></Layout></ProtectedRoute>}
+                            element={<ProtectedRoute isLoggedIn={authState.isLoggedIn}><Layout onLogout={handleLogout} userRole={authState.userRole}><Dashboard userRole={authState.userRole} refreshTrigger={refreshTrigger} /></Layout></ProtectedRoute>}
                         />
                         <Route
                             path="/pos"
-                            element={<ProtectedRoute isLoggedIn={authState.isLoggedIn}><Layout onLogout={handleLogout} userRole={authState.userRole}><PosView /></Layout></ProtectedRoute>}
+                            element={<ProtectedRoute isLoggedIn={authState.isLoggedIn}><Layout onLogout={handleLogout} userRole={authState.userRole}><PosView onSaleSuccess={triggerDataRefresh} /></Layout></ProtectedRoute>}
                         />
                         <Route
                             path="/management"

@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import apiClient from './api'; // 1. Cambiamos la importación
+import apiClient from './api';
 import { toast } from 'react-toastify';
 import ProductCatalog from './ProductCatalog';
 import ShoppingCart from './ShoppingCart';
 import { Grid, Paper } from '@mui/material';
 
-const PosView = () => {
+const PosView = ({ onSaleSuccess }) => {
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [cart, setCart] = useState([]);
-    const [refreshProducts, setRefreshProducts] = useState(false); // Para refrescar el stock post-venta
+    const [refreshProducts, setRefreshProducts] = useState(false);
 
     useEffect(() => {
         setIsLoading(true);
-        // 2. Usamos apiClient en lugar de axios
         apiClient.get('/api/products')
             .then(response => {
                 setProducts(response.data);
@@ -24,7 +23,7 @@ const PosView = () => {
             .finally(() => {
                 setIsLoading(false);
             });
-    }, [refreshProducts]); // Ahora se refresca cuando cambia refreshProducts
+    }, [refreshProducts]);
 
     const addToCart = (productToAdd) => {
         const itemInCart = cart.find(item => item.id === productToAdd.id);
@@ -75,12 +74,12 @@ const PosView = () => {
             cart: cart.map(({ id, quantity, price }) => ({ id, quantity, price })),
             total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
         };
-        // 3. Usamos apiClient en lugar de axios
         apiClient.post('/api/sales', saleData)
             .then(response => {
                 toast.success('¡Venta registrada con éxito!');
                 setCart([]);
-                setRefreshProducts(prev => !prev); // Refrescamos la lista de productos
+                setRefreshProducts(prev => !prev);
+                onSaleSuccess();
             })
             .catch(error => {
                 console.error('Error al finalizar la venta:', error);
