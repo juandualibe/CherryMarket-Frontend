@@ -1,4 +1,3 @@
-// frontend/src/Calculator.js
 import React, { useState, useEffect } from 'react';
 import { Paper, Grid, Button, Typography, Box } from '@mui/material';
 
@@ -48,6 +47,17 @@ const Calculator = () => {
     setDisplay(previousNumber + ' ' + operator + ' ' + percentage);
   };
 
+  const handleToggleSign = () => {
+    if (currentNumber === '') return;
+    const newNumber = (parseFloat(currentNumber) * -1).toString();
+    setCurrentNumber(newNumber);
+    if (operator && previousNumber) {
+      setDisplay(previousNumber + ' ' + operator + ' ' + newNumber);
+    } else {
+      setDisplay(newNumber);
+    }
+  };
+
   const handleCalculate = () => {
     if (!previousNumber || !operator || currentNumber === '') return;
     const num1 = previousNumber;
@@ -77,7 +87,6 @@ const Calculator = () => {
     setPreviousNumber(null);
   };
 
-  // Manejo de teclado
   useEffect(() => {
     const handleKeyDown = (event) => {
       const { key } = event;
@@ -93,6 +102,8 @@ const Calculator = () => {
         handleBackspace();
       } else if (key === 'Escape') {
         handleClear();
+      } else if (key === 'n' || key === 'N') {
+        handleToggleSign();
       }
     };
 
@@ -104,26 +115,31 @@ const Calculator = () => {
     { label: 'C', action: handleClear, color: 'error' },
     { label: '⌫', action: handleBackspace, color: 'secondary' },
     { label: '%', action: handlePercentage },
+    { label: '+/-', action: handleToggleSign },
+
     { label: '7', action: () => handleNumber('7') },
     { label: '8', action: () => handleNumber('8') },
     { label: '9', action: () => handleNumber('9') },
+    { label: '*', action: () => handleOperator('*') },
+
     { label: '4', action: () => handleNumber('4') },
     { label: '5', action: () => handleNumber('5') },
     { label: '6', action: () => handleNumber('6') },
+    { label: '/', action: () => handleOperator('/') },
+
     { label: '1', action: () => handleNumber('1') },
     { label: '2', action: () => handleNumber('2') },
     { label: '3', action: () => handleNumber('3') },
-    { label: '0', action: () => handleNumber('0'), span: 2 },
+    { label: '-', action: () => handleOperator('-') },
+
+    { label: '0', action: () => handleNumber('0') },
     { label: '.', action: () => handleNumber('.') },
     { label: '=', action: handleCalculate, color: 'success' },
-    { label: '/', action: () => handleOperator('/') },
-    { label: '*', action: () => handleOperator('*') },
-    { label: '-', action: () => handleOperator('-') },
     { label: '+', action: () => handleOperator('+') },
   ];
 
   return (
-    <Paper elevation={3} sx={{ p: 2, maxWidth: 300 }}>
+    <Paper elevation={3} sx={{ p: 2, width: '100%', maxWidth: 600 }}>
       <Typography variant="h6" gutterBottom>
         Calculadora
       </Typography>
@@ -132,7 +148,7 @@ const Calculator = () => {
       </Box>
       <Grid container spacing={1}>
         {buttons.map((button, index) => (
-          <Grid item xs={button.span || 4} key={index}>
+          <Grid item xs={3} key={index}>
             <Button
               variant="contained"
               color={button.color || 'primary'}
